@@ -264,78 +264,91 @@ const ApiContext = React.createContext(null)
                 `}/>
           <Highlight className="jsx">
             {`
-<ApiContext.Provider value={{getReviews: Promise.resolve([stubReview()])}}>
-    <div>
-        <h3>Any amount of items in between these</h3>
-        <ApiContext.Consumer>{(api) =>
-            <ApiLoadedReviewSummary api={api} />
-        }</ApiContext.Consumer>
-    </div>
+<ApiContext.Provider value={{getReviews: () => Promise.resolve(stubReview())}}>
+    <ApiContext.Consumer>{(api) =>
+      <ApiLoadedReviewSummary api={api} id={123} />
+    }</ApiContext.Consumer>
 </ApiContext.Provider>
                 `}
           </Highlight>
 
           <ApiContext.Provider value={{getReviews: () => Promise.resolve(stubReview())}}>
-            <div>
-              <h3>Any amount of items in between these</h3>
-              <ApiContext.Consumer>{(api) =>
-                <ApiLoadedReviewSummary api={api} />
-              }</ApiContext.Consumer>
-            </div>
+            <ApiContext.Consumer>{(api) =>
+              <ApiLoadedReviewSummary api={api} id={123} />
+            }</ApiContext.Consumer>
           </ApiContext.Provider>
         </>
     )})
 
-    .add(``, () => {
-        const ApiContext = React.createContext(null)
+    .add(`Without providers`, () => {
+        const ApiContext = React.createContext({
+            getReviews: () => Promise.resolve(stubReview())
+        })
         return (
         <>
           <Markdown source={`
-# Create a React Context
+# Setting Providers is a Pain
+
+So provide a default value instead.
                 `}/>
           <Highlight className="jsx">{`
-const ApiContext = React.createContext(null)
+const ApiContext = React.createContext({
+    getReviews: Promise.resolve(stubReview())
+})
                 `}</Highlight>
           <Markdown source={`
 ## Usage
                 `}/>
           <Highlight className="jsx">
             {`
-<ApiContext.Provider value={{getReviews: Promise.resolve([stubReview()])}}>
-    <div>
-        <h3>Any amount of items in between these</h3>
-        <ApiContext.Consumer>{(api) =>
-            <ApiLoadedReviewSummary api={api} />
-        }</ApiContext.Consumer>
-    </div>
-</ApiContext.Provider>
+<ApiContext.Consumer>{(api) =>
+    <ApiLoadedReviewSummary api={api} id={123} />
+}</ApiContext.Consumer>
                 `}
           </Highlight>
 
-          <ApiContext.Provider value={{getReviews: () => Promise.resolve(stubReview())}}>
-            <div>
-              <h3>Any amount of items in between these</h3>
-              <ApiContext.Consumer>{(api) =>
-                <ApiLoadedReviewSummary api={api} />
-              }</ApiContext.Consumer>
-            </div>
-          </ApiContext.Provider>
+          <ApiContext.Consumer>{(api) =>
+            <ApiLoadedReviewSummary api={api} id={123} />
+          }</ApiContext.Consumer>
         </>
     )})
 
+    .add(`Create HoC`, () => {
+        const ApiContext = React.createContext({
+            getReviews: () => Promise.resolve(stubReview())
+        })
+        const withApiContext = (Component) => (props) => (
+            <ApiContext.Consumer>{(api) =>
+                <Component api={api} {...props} />
+            }</ApiContext.Consumer>
+        )
+        const LoadedReviewSummary = withApiContext(ApiLoadedReviewSummary)
 
+        return (
+            <>
+              <Markdown source={`
+# Tip: Create an ApiContext Higher Order Component (HoC)
+                `}/>
+              <Highlight className="jsx">{`
+const withApiContext = (Component) => (props) => (
+    <ApiContext.Consumer>{(api) =>
+        <Component api={api} {...props} />
+    }</ApiContext.Consumer>
+)
+                `}</Highlight>
+              <Highlight className="jsx">{`
+const LoadedReviewSummary = withApiContext(ApiLoadedReviewSummary)
+                `}</Highlight>
+              <Markdown source={`
+Can now be used transparently
+                `}/>
+              <Highlight className="jsx">
+                {`
+<LoadedReviewSummary id={456} />
+                `}
+              </Highlight>
 
-    .add(`basic`, () => (
-        <>
-          <Markdown source={`
-# Welcome
-better
-            `}/>
-          <ReviewSummary
-            name={text(`name`, `Francine Periwinkle's Peticoat Blues`)}
-            rating={number(`rating`, 3)} />
-        </>
-    ))
-    .add(`loaded`, () => (
-        <LoadedReviewSummary id={123} />
-    ))
+              <LoadedReviewSummary id={456} />
+            </>
+        )})
+
