@@ -47,7 +47,7 @@ const StarRatingInput = ({rating, starCount=5}) => (
 const StarRating = ({rating, starCount=5}) =>
       create(StarRatingContainer, null,
            create(StarRatingInput, {rating, starCount}),
-           ...repeat(5)(i => create(Star, {active: i < rating}))
+           ...repeat(starCount)(i => create(Star, {active: i < rating}))
       )
 
 const ReviewSummary = ({name, rating}) => (
@@ -81,6 +81,8 @@ storiesOf(`My presentation`)
 # React Context, Storybook and Other Tips
 
 ## George Mauer - @togakangaroo
+
+**I just rewrote this!**
 `}/>
     ))
     .add(`A common problem`, () => (
@@ -137,6 +139,11 @@ const When = ({value, render}) => (
           <Markdown source={`
 # Tip: Create a \`When\` component
                 `}/>
+          <Highlight className="javascript">{`
+const When = ({value, render}) => (
+    value ? render(value) : \`Please Wait...\`
+)
+                `}</Highlight>
           <Highlight className="jsx">{`
 const DirectQueryLoadedReviewSummary = class extends React.Component {
     render = () => (
@@ -459,6 +466,8 @@ const ApiContext = React.createContext({
         <>
           <Markdown source={`
 # Tip: You don't *always* need Jsx
+
+Some things are significantly easier without it
                 `}/>
 
           <Highlight className="javascript">
@@ -502,5 +511,22 @@ const ReviewSummary = ({name, rating}) => (
 )
           `}
           </Highlight>
+        </>
+    ))
+
+    .add(`Storybook`, () => (
+        <>
+          <Markdown source={`
+# Thoughts on [Storybook](https://storybook.js.org/)
+
+* Very powerful "playground" tool - REPL-Driven-Development
+* Fast to set up for standard architectures
+* Great for component gallery
+* Can do some of what TDD does
+
+Also
+
+* Clearly this is great
+                `}/>
         </>
     ))
