@@ -82,7 +82,7 @@ storiesOf(`My presentation`)
 
 ## George Mauer - @togakangaroo
 
-**I just rewrote this!**
+**I just wrote this!**
 `}/>
     ))
     .add(`A common problem`, () => (
@@ -97,12 +97,17 @@ I want to create a component that hits an api
         <>
 
             <Markdown source={`
-# A Common Problem
-
-I want to create a component that hits an api
+# Tip: All Components Should Either Do Stuff Or Render Stuff, **Not** Both
                 `}/>
 
             <Highlight className="javascript">{`
+const ReviewSummary = ({name, rating}) => (
+    <figure>
+      <figcaption>{name}</figcaption>
+      <StarRating rating={rating} starCount={5} />
+    </figure>
+)
+
 const DirectQueryLoadedReviewSummary = class extends React.Component {
     render = () => (
         {!this.state ? "Please Wait" : (
