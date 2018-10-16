@@ -176,7 +176,7 @@ const DirectQueryLoadedReviewSummary = class extends React.Component {
           <Markdown source={`
 # Tip: Stub the entire Api method
                 `}/>
-          <Highlight className="jsx">{`
+          <Highlight className="javascript">{`
 const ApiLoadedReviewSummary = class extends React.Component {
     render = () => (
         <When value={this.state} render={s => (
@@ -248,6 +248,84 @@ That's it!
           </DemoContext.Provider>
         </>
     )})
+
+    .add(`Static Scoping`, () => (
+        <>
+            <Markdown source={`
+# Javascript Has Static/Lexical Scope
+
+**Interview question time!**
+                `}/>
+        <Highlight className="jsx">{`
+let a = 1
+let b = 2
+
+const fn2 = () => {
+    a = 3
+}
+
+const fn1 = (a) => {
+    a = 4
+    b = 3
+    fn1()
+}
+
+fn2(a)
+
+console.log(a)
+console.log(b)
+                `}</Highlight>
+        </>
+    ))
+
+    .add(`Dynamic Scoping`, () => (
+        <>
+          <Markdown source={`
+# Dynamic Scoping
+
+* Rarer
+* Can make things incredibly extensible
+                `}/>
+          <figure style={{display: `flex`, alignItems: `flex-start`}}>
+            <div style={{flex: `1`}}>
+                <Highlight className="jsx">{`
+let a = 1
+let b = 2
+
+const fn2 = () => {
+    a = 3
+}
+
+const fn1 = (a) => {
+    a = 4
+    b = 3
+    fn1()
+}
+
+fn2(a)
+
+console.log(a)
+console.log(b)
+                    `}</Highlight>
+                </div>
+                <img src="/dynamic_scoping.png" style={{width: `40%`, objectFit: 'contain'}} />
+            </figure>
+        </>
+    ))
+
+    .add(`Opt-in Dynamic Scoping`, () => (
+        <>
+          <div style={{display: `flex`, flexDirection: `column`}}>
+            <Markdown source={`
+# Dynamic Scoping is Confusing
+
+But Opt-In dynamic scoping...is awesome
+                `}/>
+            <img src="trex-samurai.jpg" style={{flex: `1`, height: `-webkit-fill-available`}} />
+         </div>
+        </>
+    ))
+
 
     .add(`Context With Api`, () => {
         const ApiContext = React.createContext(null)
@@ -352,3 +430,42 @@ Can now be used transparently
             </>
         )})
 
+
+    .add(`Delayed Promise Resolver`, () => {
+        const resolveIn = ms => value => new Promise(resolve =>
+            setTimeout(() => resolve(value), ms)
+        )
+        const ApiContext = React.createContext({
+            getReviews: () => resolveIn(number("Loading delay", 5000))(stubReview())
+        })
+        const withApiContext = (Component) => (props) => (
+            <ApiContext.Consumer>{(api) =>
+                <Component api={api} {...props} />
+            }</ApiContext.Consumer>
+        )
+        const LoadedReviewSummary = withApiContext(ApiLoadedReviewSummary)
+
+        return (
+            <>
+              <Markdown source={`
+# Tip: Create a Promise Reolver You Can Control
+
+To test what what it looks like while loading
+                `}/>
+              <Highlight className="jsx">{`
+const resolveIn = ms => value => new Promise(resolve =>
+    setTimeout(() => resolve(value), ms)
+)
+const ApiContext = React.createContext({
+    getReviews: () => resolveIn(number("Loading delay", 5000))(stubReview())
+})
+                `}</Highlight>
+              <Highlight className="jsx">
+                {`
+<LoadedReviewSummary id={456} />
+                `}
+              </Highlight>
+
+              <LoadedReviewSummary id={456} />
+            </>
+        )})
