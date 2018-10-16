@@ -59,21 +59,6 @@ const ReviewSummary = ({name, rating}) => (
 
 const When = ({value, render}) => value ? render(value) : `Please Wait...`
 
-const LoadedReviewSummary = class extends React.Component {
-    render = () => (
-        <When value={this.state} render={s => (
-            <ReviewSummary {...s.review}/>
-        )} />
-    )
-    componentDidUpdate = async (prevProps) => {
-        if(this.props.id === this.prevProps.id)
-            return
-        const review = await this.props.api.getReview(this.props.id)
-        this.setState({review})
-    }
-    componentDidMount = () => this.componentDidUpdate()
-}
-
 const ApiLoadedReviewSummary = class extends React.Component {
     render = () => (
         <When value={this.state} render={s => (
@@ -123,7 +108,7 @@ const DirectQueryLoadedReviewSummary = class extends React.Component {
         )} />
     )
     componentDidUpdate = async (prevProps) => {
-        if(!this.prevProps || (this.props.id === this.prevProps.id))
+        if(prevProps && (this.props.id === prevProps.id))
             return
         const review = await fetch('/api/reviews' + this.props.id).then(x => x.json())
         this.setState({review})
@@ -160,7 +145,7 @@ const DirectQueryLoadedReviewSummary = class extends React.Component {
         )} />
     )
     componentDidUpdate = async (prevProps) => {
-        if(!this.prevProps || (this.props.id === this.prevProps.id))
+        if(prevProps && (this.props.id === prevProps.id))
             return
         const review = await fetch('/api/reviews' + this.props.id).then(x => x.json())
         this.setState({review})
@@ -184,7 +169,7 @@ const ApiLoadedReviewSummary = class extends React.Component {
         )} />
     )
     componentDidUpdate = async (prevProps) => {
-        if(!this.prevProps || (this.props.id === this.prevProps.id))
+        if(prevProps && (this.props.id === prevProps.id))
             return
         const review = await this.props.api.getReviews(this.props.id)
         this.setState({review})
@@ -469,3 +454,53 @@ const ApiContext = React.createContext({
               <LoadedReviewSummary id={456} />
             </>
         )})
+
+    .add(`Maybe not Jsx`, () => (
+        <>
+          <Markdown source={`
+# Tip: You don't *always* need Jsx
+                `}/>
+
+          <Highlight className="javascript">
+            {`
+const ActiveStar = styled.i\`
+    color: gold;
+\`
+const InactiveStar = styled.i\`
+    color: gray;
+\`
+
+const Star = ({active}) => create(active ? ActiveStar : InactiveStar, {}, \`★\`)
+
+const StarRatingContainer = styled.div\`
+    font-size: 50px;
+    display: flex;
+    align-items: center;
+\`
+
+const HiddenInput = styled.input\`
+    visibility: hidden;
+    height: 0;
+    width: 0;
+\`
+const StarRatingInput = ({rating, starCount=5}) => (
+    <HiddenInput type="range" min={0} max={starCount} value={rating} readOnly={true} />
+)
+
+const create = React.CreateElement
+const StarRating = ({rating, starCount=5}) =>
+    create(StarRatingContainer, null,
+        create(StarRatingInput, {rating, starCount}),
+            ...repeat(starCount)(i => create(Star, {active: i < rating}))
+    )
+
+const ReviewSummary = ({name, rating}) => (
+    <figure>
+        <figcaption>{name}</figcaption>
+        <StarRating rating={rating} starCount={5} />
+    </figure>
+)
+          `}
+          </Highlight>
+        </>
+    ))
