@@ -4,7 +4,7 @@ import Markdown from 'react-markdown'
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import styled from 'styled-components'
-import { withKnobs, number, text } from '@storybook/addon-knobs';
+import { withKnobs, number, text, boolean } from '@storybook/addon-knobs';
 
 import Highlight from 'react-highlight'
 import 'highlight.js/styles/a11y-dark.css'
@@ -14,6 +14,10 @@ const repeat = num => function * (fn) {
     for(let n = 0; n < num; n++)
         yield fn(n)
 }
+
+const resolveIn = ms => value => new Promise(resolve =>
+    setTimeout(() => resolve(value), ms)
+)
 
 const stubReview = () => ({
     name: text(`name`, `Francine Periwinkle's Peticoat Blues`),
@@ -74,7 +78,7 @@ const ApiLoadedReviewSummary = class extends React.Component {
     componentDidMount = () => this.componentDidUpdate()
 }
 
-storiesOf(`My presentation`)
+const stories = storiesOf(`My presentation`)
     .addDecorator(withKnobs)
     .add(`Intro`, () => (
         <Markdown source={`
@@ -264,10 +268,10 @@ const fn2 = () => {
 const fn1 = (a) => {
     a = 4
     b = 3
-    fn1()
+    fn2()
 }
 
-fn2(a)
+fn1(a)
 
 console.log(a)
 console.log(b)
@@ -429,9 +433,6 @@ Can now be used transparently
 
 
     .add(`Delayed Promise Resolver`, () => {
-        const resolveIn = ms => value => new Promise(resolve =>
-            setTimeout(() => resolve(value), ms)
-        )
         const ApiContext = React.createContext({
             getReviews: () => resolveIn(number("Loading delay", 5000))(stubReview())
         })
@@ -519,9 +520,89 @@ const ReviewSummary = ({name, rating}) => (
         </>
     ))
 
+    .add(`Auto unmount`, () => {
+        const ApiContext = React.createContext({
+            getReviews: () => resolveIn(number("Loading delay", 5000))(stubReview())
+        })
+
+        const proxyPromise = (promise, {beforeCompletion}) => new Promise((resolve, reject) =>
+            promise.then(beforeCompletion(resolve), beforeCompletion(reject))
+        )
+        const propsToObject = (props, createValue) =>
+              Object.fromEntries(props.map(prop => [prop, (...args) => createValue(prop, ...args)]))
+
+        const withApiContext = (...apiPropNames) => (Component) =>
+              class extends React.Component {
+                  render = () => (
+                      <ApiContext.Consumer>{(contextApi) => {
+                          const api = propsToObject(apiPropNames,
+                            (prop, ...args) => proxyPromise(contextApi[prop](...args), {beforeCompletion: this.ifMounted})
+                          )
+                          return (
+                              <Component api={api} {...this.props} />
+                          )
+                      }}</ApiContext.Consumer>
+                  )
+                  ifMounted = fn => (...args) => !this.isUnmounted && fn(...args)
+                  componentWillUnmount = () => {
+                      this.isUnmounted = true
+                  }
+              }
+        const LoadedReviewSummary = withApiContext(`getReviews`)(ApiLoadedReviewSummary)
+        return (
+            <>
+              <Markdown source={`
+# More Complex Things
+
+With our \`withApiContext\` HoC we now have hooks to do other interesting things
+
+* Let's force people to be explicit about what apis they want to use
+* Let's never resolve any promises if our HoC is unmounted
+
+Do this by creating a new api object to pass down to the component. This will only have the functions requested and
+proxy the promise with its own version that will only resolve if the component is not mounted
+`}/>
+              <Highlight className="javascript">{`
+const ApiContext = React.createContext({
+    getReviews: () => resolveIn(number("Loading delay", 5000))(stubReview())
+})
+
+const proxyPromise = (promise, {beforeCompletion}) => new Promise((resolve, reject) =>
+    promise.then(beforeCompletion(resolve), beforeCompletion(reject))
+)
+const propsToObject = (props, createValue) =>
+        Object.fromEntries(props.map(prop => [prop, (...args) => createValue(prop, ...args)]))
+
+const withApiContext = (...apiPropNames) => (Component) =>
+        class extends React.Component {
+            render = () => (
+                <ApiContext.Consumer>{(contextApi) => {
+                    const api = propsToObject(apiPropNames,
+                    (prop, ...args) => proxyPromise(contextApi[prop](...args), {beforeCompletion: this.ifMounted})
+                    )
+                    return (
+                        <Component api={api} {...this.props} />
+                    )
+                }}</ApiContext.Consumer>
+            )
+            ifMounted = fn => (...args) => !this.isUnmounted && fn(...args)
+            componentWillUnmount = () => {
+                this.isUnmounted = true
+            }
+        }
+const LoadedReviewSummary = withApiContext("getReviews")(ApiLoadedReviewSummary)
+            `}
+            </Highlight>
+              {!boolean("currently mounted", true) ? null :
+                <LoadedReviewSummary id={123} />
+              }
+            </>
+        )
+    })
+
     .add(`Storybook`, () => (
-        <>
-          <Markdown source={`
+          <>
+            <Markdown source={`
 # Thoughts on [Storybook](https://storybook.js.org/)
 
 * Very powerful "playground" tool - REPL-Driven-Development
@@ -533,5 +614,5 @@ Also
 
 * Clearly this is great
                 `}/>
-        </>
-    ))
+          </>
+      ))
