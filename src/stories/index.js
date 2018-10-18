@@ -92,6 +92,10 @@ storiesOf(`Presentation`)
             ## George Mauer - @togakangaroo
 
             **I just wrote this!**
+
+            [Code is here](https://github.com/togakangaroo/react-context-storybook/tree/master)
+
+            [View this online here](http://georgemauer.net/react-context-storybook/storybook-static)
         `)
     ))
 
