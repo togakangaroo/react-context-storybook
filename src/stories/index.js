@@ -83,127 +83,117 @@ const ApiLoadedReviewSummary = class extends React.Component {
     componentDidMount = () => this.componentDidUpdate()
 }
 
-const stories = storiesOf(`My presentation`)
+storiesOf(`Presentation`)
     .addDecorator(withKnobs)
-    .add(`Intro`, () => (
-        <Markdown source={`
-# React Context, Storybook and Other Tips
+    .add(`Intro`, () => render(
+        md(`
+            # React Context, Storybook and Other Tips
 
-## George Mauer - @togakangaroo
+            ## George Mauer - @togakangaroo
 
-**I just wrote this!**
-`}/>
-    ))
-    .add(`A common problem`, () => (
-        <Markdown source={`
-# A Common Problem
-
-I want to create a component that hits an api
-            `}/>
+            **I just wrote this!**
+        `)
     ))
 
-    .add(`Basic direct query component`, () => (
-        <>
+    .add(`A common problem`, () => render(
+        md(`
+            # A Common Problem
 
-            <Markdown source={`
-# Tip: All Components Should Either Do Stuff Or Render Stuff, **Not** Both
-                `}/>
-
-            <Highlight className="javascript">{`
-const ReviewSummary = ({name, rating}) => (
-    <figure>
-      <figcaption>{name}</figcaption>
-      <StarRating rating={rating} starCount={5} />
-    </figure>
-)
-
-const DirectQueryLoadedReviewSummary = class extends React.Component {
-    render = () => (
-        {!this.state ? "Please Wait" : (
-            <ReviewSummary {...this.state.review}/>
-        )} />
-    )
-    componentDidUpdate = async (prevProps) => {
-        if(prevProps && (this.props.id === prevProps.id))
-            return
-        const review = await fetch('/api/reviews' + this.props.id).then(x => x.json())
-        this.setState({review})
-    }
-    componentDidMount = () => this.componentDidUpdate()
-}
-                `}</Highlight>
-        </>
+            I want to create a component that hits an api
+        `)
     ))
 
-    .add(`Create When`, () => (
-        <>
-          <Markdown source={`
-# Tip: Create a \`When\` component
-                `}/>
-          <Highlight className="javascript">{`
-const When = ({value, render}) => (
-    value ? render(value) : \`Please Wait...\`
-)
-                `}</Highlight>
-        </>
+    .add(`Basic direct query component`, () => render(
+        md(`
+            # Tip: All Components Should Either Do Stuff Or Render Stuff, **Not** Both
+        `),
+        code(`
+            const ReviewSummary = ({name, rating}) => (
+                <figure>
+                    <figcaption>{name}</figcaption>
+                    <StarRating rating={rating} starCount={5} />
+                </figure>
+            )
+
+            const DirectQueryLoadedReviewSummary = class extends React.Component {
+                render = () => (
+                    {!this.state ? "Please Wait" : (
+                        <ReviewSummary {...this.state.review}/>
+                    )} />
+                )
+                componentDidUpdate = async (prevProps) => {
+                    if(prevProps && (this.props.id === prevProps.id))
+                        return
+                    const review = await fetch('/api/reviews' + this.props.id).then(x => x.json())
+                    this.setState({review})
+                }
+                componentDidMount = () => this.componentDidUpdate()
+            }
+        `)
     ))
 
-    .add(`Use When`, () => (
-        <>
-          <Markdown source={`
-# Tip: Create a \`When\` component
-                `}/>
-          <Highlight className="javascript">{`
-const When = ({value, render}) => (
-    value ? render(value) : \`Please Wait...\`
-)
-                `}</Highlight>
-          <Highlight className="jsx">{`
-const DirectQueryLoadedReviewSummary = class extends React.Component {
-    render = () => (
-        <When value={this.state} render={s => (
-            <ReviewSummary {...s.review}/>
-        )} />
-    )
-    componentDidUpdate = async (prevProps) => {
-        if(prevProps && (this.props.id === prevProps.id))
-            return
-        const review = await fetch('/api/reviews' + this.props.id).then(x => x.json())
-        this.setState({review})
-    }
-    componentDidMount = () => this.componentDidUpdate()
-}
-                `}</Highlight>
-        </>
+    .add(`Create When`, () => render(
+        md(`
+            # Tip: Create a \`When\` component
+        `),
+        code(`
+            const When = ({value, render}) => (
+                value ? render(value) : \`Please Wait...\`
+            )
+        `)
     ))
 
-    .add(`Stub the entire Api method`, () => (
-        <>
-          <Markdown source={`
-# Tip: Stub the entire Api method
-                `}/>
-          <Highlight className="javascript">{`
-const ApiLoadedReviewSummary = class extends React.Component {
-    render = () => (
-        <When value={this.state} render={s => (
-            <ReviewSummary {...s.review}/>
-        )} />
-    )
-    componentDidUpdate = async (prevProps) => {
-        if(prevProps && (this.props.id === prevProps.id))
-            return
-        const review = await this.props.api.getReviews(this.props.id)
-        this.setState({review})
-    }
-    componentDidMount = () => this.componentDidUpdate()
-}
-                `}</Highlight>
-          <Markdown source={`
-But how to actually pass down that \`api\` property?
-                `}/>
-        </>
+    .add(`Use When`, () => render(
+        md(`
+            # Tip: Create a \`When\` component
+        `),
+        code(`
+            const When = ({value, render}) => (
+                value ? render(value) : \`Please Wait...\`
+            )
+        `),
+        code(`
+            const DirectQueryLoadedReviewSummary = class extends React.Component {
+                render = () => (
+                    <When value={this.state} render={s => (
+                        <ReviewSummary {...s.review}/>
+                    )} />
+                )
+                componentDidUpdate = async (prevProps) => {
+                    if(prevProps && (this.props.id === prevProps.id))
+                        return
+                    const review = await fetch('/api/reviews' + this.props.id).then(x => x.json())
+                    this.setState({review})
+                }
+                componentDidMount = () => this.componentDidUpdate()
+            }
+        `),
     ))
 
+    .add(`Stub the entire Api method`, () => render(
+        md(`
+            # Tip: Stub the entire Api method
+        `),
+        code(`
+            const ApiLoadedReviewSummary = class extends React.Component {
+                render = () => (
+                    <When value={this.state} render={s => (
+                        <ReviewSummary {...s.review}/>
+                    )} />
+                )
+                componentDidUpdate = async (prevProps) => {
+                    if(prevProps && (this.props.id === prevProps.id))
+                        return
+                    const review = await this.props.api.getReviews(this.props.id)
+                    this.setState({review})
+                }
+                componentDidMount = () => this.componentDidUpdate()
+            }
+        `),
+        md(`
+            But how to actually pass down that \`api\` property?
+        `)
+    ))
 
     .add(`Context Demo`, () => {
         const DemoContext = React.createContext(null)
@@ -212,76 +202,73 @@ But how to actually pass down that \`api\` property?
                 <i>Our value: {value}</i> 
             }</DemoContext.Consumer>
         )
-        return (
-        <>
-          <Markdown source={`
-# Create a React Context
-                `}/>
-          <Highlight className="jsx">{`
-const DemoContext = React.createContext(null)
-                `}</Highlight>
-          <Markdown source={`
-## Usage
-                `}/>
-          <Highlight className="jsx">
-            {`
-const DemoConsumer = () => (
-    <DemoContext.Consumer>{(value) =>
-        <i>Our value: {value}</i> 
-    }</DemoContext.Consumer>
-)
-                `}
-          </Highlight>
-          <Highlight className="jsx">
-            {`
-<DemoContext.Provider value={text("provided value", "abc")}>
-    <figure>
-        <figcaption>Any amount of items in between these</figcaption>
-        <Demo />
-    </figure>
-</DemoContext.Provider>
-                `}
-          </Highlight>
-          <Markdown source={`
-That's it!
-                `}/>
 
-          <DemoContext.Provider value={text("provided value", "abc")}>
-            <figure>
-              <figcaption>Any amount of items in between these</figcaption>
-              <Demo />
-            </figure>
-          </DemoContext.Provider>
-        </>
-    )})
+        return render(
+            md(`
+                # Create a React Context
+            `),
+            code(`
+                const DemoContext = React.createContext(null)
+            `),
+            md(`
+                ## Usage
+            `),
+            code(`
+                const DemoConsumer = () => (
+                    <DemoContext.Consumer>{(value) =>
+                        <i>Our value: {value}</i> 
+                    }</DemoContext.Consumer>
+                )
+            `),
+            code(`
+                <DemoContext.Provider value={text("provided value", "abc")}>
+                    <figure>
+                        <figcaption>Any amount of items in between these</figcaption>
+                        <Demo />
+                    </figure>
+                </DemoContext.Provider>
+            `),
+            md(`
+                That's it!
+            `), (
+                <DemoContext.Provider value={text("provided value", "abc")}>
+                    <figure>
+                        <figcaption>Any amount of items in between these</figcaption>
+                        <Demo />
+                    </figure>
+                </DemoContext.Provider>
+            ),
+            md(`
+                (Also, knobs is pretty cool check out the knobs panel below ↓)
+            `)
+        )
+    })
 
-    .add(`Static Scoping`, () => (
-        <>
-            <Markdown source={`
-# Javascript Has Static/Lexical Scope
+    .add(`Static Scoping`, () => render(
+        md(`
+            # Javascript Has Static / Lexical Scope
 
-**Interview question time!**
-                `}/>
-        <Highlight className="jsx">{`
-let a = 1
-let b = 2
+            **Interview question time!**
+        `),
+        code(`
+            let a = 1
+            let b = 2
 
-const fn2 = () => {
-    a = 3
-}
+            const fn2 = () => {
+                a = 3
+            }
 
-const fn1 = (a) => {
-    a = 4
-    b = 3
-    fn2()
-}
+            const fn1 = () => {
+                let a = 4
+                b = 3
+                fn2()
+            }
 
-fn1(a)
+            fn1(a)
 
-console.log(a)
-console.log(b)
-                `}</Highlight>
-        </>
+            console.log(a) // 3
+            console.log(b) // 3
+        `)
     ))
 
     .add(`Dynamic Scoping`, () => render(
@@ -294,23 +281,23 @@ console.log(b)
         <figure style={{display: `flex`, alignItems: `flex-start`}}>
             <Growing>
               {code(`
-                    let a = 1
-                    let b = 2
+                let a = 1
+                let b = 2
 
-                    const fn2 = () => {
-                        a = 3
-                    }
+                const fn2 = () => {
+                    a = 3
+                }
 
-                    const fn1 = (a) => {
-                        a = 4
-                        b = 3
-                        fn1()
-                    }
+                const fn1 = () => {
+                    let a = 4
+                    b = 3
+                    fn2()
+                }
 
-              fn2(a)
+                fn1()
 
-              console.log(a)
-              console.log(b)
+                console.log(a) // 1
+                console.log(b) // 3
               `)}
             </Growing>
             <ShrinkingImg src="/dynamic_scoping.png" style={{width: `40%`}} />
